@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_chat"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".fragment.ChatFragment">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_alignParentTop="true"
+        android:layout_above="@+id/fragment_chat_button">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/fragment_chat_listlayout"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/quiz"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="이더리움연구회의 최대 행사는?" />
+
+            <TextView
+                android:id="@+id/select1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="분과모임" />
+
+            <TextView
+                android:id="@+id/select2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="엠티" />
+
+            <TextView
+                android:id="@+id/select3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="데브스탬프" />
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/fragment_chat_listlayout"
+            android:layout_width="match_parent"
+            android:layout_height="400dp"
+            android:layout_alignParentBottom="true"
+            android:orientation="vertical">
+
+            <ListView
+                android:id="@+id/fragment_chat_listview"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_above="@+id/fragment_chat_button"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true">
+
+            </ListView>
+
+        </LinearLayout>
+    </RelativeLayout>
+
+
+        <EditText
+            android:id="@+id/fragment_chat_editText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentBottom="true"
+            android:layout_toLeftOf="@+id/fragment_chat_button" />
+
+        <Button
+            android:id="@+id/fragment_chat_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:text="send" />
+
+</RelativeLayout>
