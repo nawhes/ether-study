@@ -3,12 +3,28 @@ package com.etherstudy.quizdapp.fragment;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.etherstudy.quizdapp.R;
+
+import org.web3j.crypto.CipherException;
+import org.web3j.crypto.Credentials;
+import org.web3j.crypto.WalletUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -21,12 +37,16 @@ import com.etherstudy.quizdapp.R;
 public class WalletFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+//    private static final String ARG_PARAM1 = "param1";
+//    private static final String ARG_PARAM2 = "param2";
 
     // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+//    private String mParam1;
+//    private String mParam2;
+
+    private EditText etPassword;
+    private TextView tvWalletAddress, tvWalletPath;
+    private Button btnCreateWallet;
 
     private OnFragmentInteractionListener mListener;
 
@@ -46,8 +66,8 @@ public class WalletFragment extends Fragment {
     public static WalletFragment newInstance(String param1, String param2) {
         WalletFragment fragment = new WalletFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+//        args.putString(ARG_PARAM1, param1);
+//        args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -56,8 +76,8 @@ public class WalletFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+//            mParam1 = getArguments().getString(ARG_PARAM1);
+//            mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
 
@@ -65,8 +85,32 @@ public class WalletFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the item_chat_list for this fragment
-        return inflater.inflate(R.layout.fragment_wallet, container, false);
+        View v = inflater.inflate(R.layout.fragment_wallet, container, false);
+
+        etPassword = v.findViewById(R.id.etPassword);
+        tvWalletAddress = v.findViewById(R.id.tvWalletAddress);
+        tvWalletPath = v.findViewById(R.id.tvWalletPath);
+        btnCreateWallet = v.findViewById(R.id.btnCreateWallet);
+        btnCreateWallet.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final String password = etPassword.getText().toString();
+                String[] result = createWallet(password);
+                if (result != null) {
+                    String walletAddress = result[1];
+                    String walletPath = result[0];
+                    tvWalletAddress.setText(walletAddress);
+                    tvWalletPath.setText(walletPath);
+                }
+            }
+        });
+        return v;
     }
+
+//    @Override
+//    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+//
+//    }
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
@@ -105,5 +149,30 @@ public class WalletFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    public String[] createWallet(final String password) {
+        String[] result = new String[2];
+        try {
+            File path = Environment.getExternalStoragePublicDirectory("/Wallet"); //다운로드 path 가져오기 //Environment.DIRECTORY_DOWNLOADS ///mnt/sdcard/Wallet
+            if (!path.exists()) {
+                path.mkdir();
+            }
+            String fileName = WalletUtils.generateLightNewWalletFile(password, new File(String.valueOf(path))); //지갑생성
+            result[0] = path+"/"+fileName;
+
+            Credentials credentials = WalletUtils.loadCredentials(password,result[0]);
+
+            result[1] = credentials.getAddress();
+
+            return result;
+        } catch (NoSuchAlgorithmException
+                | NoSuchProviderException
+                | InvalidAlgorithmParameterException
+                | IOException
+                | CipherException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

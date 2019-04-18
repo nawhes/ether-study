@@ -86,6 +86,10 @@ public class Main2Activity extends AppCompatActivity
             transaction.commit();
 
         } else if (id == R.id.nav_wallet) {
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            WalletFragment fragment = new WalletFragment();
+            transaction.replace(R.id.content_main_framelayout, fragment);
+            transaction.commit();
 
         } else if (id == R.id.nav_share) {
 
