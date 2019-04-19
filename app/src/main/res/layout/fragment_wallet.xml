@@ -1,49 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/fragment_wallet"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context=".fragment.WalletFragment">
 
-    <EditText
-        android:id="@+id/etPassword"
-        android:layout_width="300dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:layout_centerHorizontal="true"
-        android:inputType="textPassword"
-        android:hint="@string/hint_password"
-        android:textAlignment="center"
-        android:importantForAutofill="no" />
-
-    <Button
-        android:id="@+id/btnCreateWallet"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/etPassword"
-        android:layout_centerHorizontal="true"
-        android:gravity="center"
-        android:text="@string/create_wallet"
-        style="?android:attr/buttonBarButtonStyle"/>
-
+    <!-- TODO: Update blank fragment layout -->
     <TextView
-        android:id="@+id/tvWalletAddress"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/btnCreateWallet"
-        android:layout_centerHorizontal="true"
-        tools:layout_editor_absoluteX="186dp"
-        tools:layout_editor_absoluteY="327dp" />
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="@string/hello_blank_fragment" />
 
-    <TextView
-        android:id="@+id/tvWalletPath"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/tvWalletAddress"
-        android:layout_centerHorizontal="true"
-        tools:layout_editor_absoluteX="186dp"
-        tools:layout_editor_absoluteY="327dp" />
-
-</RelativeLayout>
+</FrameLayout>
