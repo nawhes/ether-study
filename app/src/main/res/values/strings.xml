@@ -18,6 +18,6 @@
     <string name="hint_password">password</string>
     <string name="hint_account">0xe6a8ec4462cce533b412651f405ad1bb41e5b28a</string>
 
-      <!-- test -->
+    <!-- test -->
     <string name="intent_create_wallet">Create Wallet</string>
 </resources>

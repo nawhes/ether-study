@@ -29,7 +29,7 @@
         style="?android:attr/buttonBarButtonStyle"/>
 
     <TextView
-        android:id="@+id/tvWalletAddress"
+        android:id="@+id/tvCreatedWalletAddress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/btnCreateWallet"
@@ -38,10 +38,10 @@
         tools:layout_editor_absoluteY="327dp" />
 
     <TextView
-        android:id="@+id/tvWalletPath"
+        android:id="@+id/tvCreatedWalletPath"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/tvWalletAddress"
+        android:layout_below="@+id/tvCreatedWalletAddress"
         android:layout_centerHorizontal="true"
         tools:layout_editor_absoluteX="186dp"
         tools:layout_editor_absoluteY="327dp" />

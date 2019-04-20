@@ -24,6 +24,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.database.FirebaseDatabase;
 
+
 public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
     private FirebaseAuth mAuth;
     private GoogleApiClient mGoogleApiClient;
@@ -72,6 +73,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             Snackbar.make(findViewById(R.id.loginactivity), "login", Snackbar.LENGTH_SHORT).show();
 
         } else {
+
+
             startActivity(new Intent(this,Main2Activity.class));
             finish();
         }

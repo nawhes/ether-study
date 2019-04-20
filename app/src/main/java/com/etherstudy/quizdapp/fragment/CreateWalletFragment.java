@@ -4,7 +4,6 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,7 +11,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.etherstudy.quizdapp.R;
 
@@ -29,12 +27,12 @@ import java.security.NoSuchProviderException;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link WalletFragment.OnFragmentInteractionListener} interface
+ * {@link CreateWalletFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link WalletFragment#newInstance} factory method to
+ * Use the {@link CreateWalletFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class WalletFragment extends Fragment {
+public class CreateWalletFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 //    private static final String ARG_PARAM1 = "param1";
@@ -45,12 +43,12 @@ public class WalletFragment extends Fragment {
 //    private String mParam2;
 
     private EditText etPassword;
-    private TextView tvWalletAddress, tvWalletPath;
+    private TextView tvCreatedWalletAddress, tvCreatedWalletPath;
     private Button btnCreateWallet;
 
     private OnFragmentInteractionListener mListener;
 
-    public WalletFragment() {
+    public CreateWalletFragment() {
         // Required empty public constructor
     }
 
@@ -60,11 +58,11 @@ public class WalletFragment extends Fragment {
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment WalletFragment.
+     * @return A new instance of fragment CreateWalletFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static WalletFragment newInstance(String param1, String param2) {
-        WalletFragment fragment = new WalletFragment();
+    public static CreateWalletFragment newInstance(String param1, String param2) {
+        CreateWalletFragment fragment = new CreateWalletFragment();
         Bundle args = new Bundle();
 //        args.putString(ARG_PARAM1, param1);
 //        args.putString(ARG_PARAM2, param2);
@@ -85,11 +83,11 @@ public class WalletFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the item_chat_list for this fragment
-        View v = inflater.inflate(R.layout.fragment_wallet, container, false);
+        View v = inflater.inflate(R.layout.fragment_create_wallet, container, false);
 
         etPassword = v.findViewById(R.id.etPassword);
-        tvWalletAddress = v.findViewById(R.id.tvWalletAddress);
-        tvWalletPath = v.findViewById(R.id.tvWalletPath);
+        tvCreatedWalletAddress = v.findViewById(R.id.tvCreatedWalletAddress);
+        tvCreatedWalletPath = v.findViewById(R.id.tvCreatedWalletPath);
         btnCreateWallet = v.findViewById(R.id.btnCreateWallet);
         btnCreateWallet.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,8 +97,8 @@ public class WalletFragment extends Fragment {
                 if (result != null) {
                     String walletAddress = result[1];
                     String walletPath = result[0];
-                    tvWalletAddress.setText(walletAddress);
-                    tvWalletPath.setText(walletPath);
+                    tvCreatedWalletAddress.setText(walletAddress);
+                    tvCreatedWalletPath.setText(walletPath);
                 }
             }
         });
@@ -162,6 +160,7 @@ public class WalletFragment extends Fragment {
             result[0] = path+"/"+fileName;
 
             Credentials credentials = WalletUtils.loadCredentials(password,result[0]);
+
 
             result[1] = credentials.getAddress();
 
