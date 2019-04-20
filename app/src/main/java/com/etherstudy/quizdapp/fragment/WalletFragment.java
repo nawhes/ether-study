@@ -7,8 +7,19 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.etherstudy.quizdapp.R;
+
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.Web3jFactory;
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.response.EthGetBalance;
+import org.web3j.protocol.http.HttpService;
+import org.web3j.utils.Convert;
+
+import java.math.BigInteger;
+import java.util.concurrent.ExecutionException;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -21,12 +32,11 @@ import com.etherstudy.quizdapp.R;
 public class WalletFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private static final String ARG_PUB_KEY = "pubKey";
 
     // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private String pubKey;
+    private TextView tvWalletAddress, tvBalance;
 
     private OnFragmentInteractionListener mListener;
 
@@ -46,8 +56,7 @@ public class WalletFragment extends Fragment {
     public static WalletFragment newInstance(String param1, String param2) {
         WalletFragment fragment = new WalletFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putString(ARG_PUB_KEY, param1);
         fragment.setArguments(args);
         return fragment;
     }
@@ -56,16 +65,22 @@ public class WalletFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            pubKey = getArguments().getString(ARG_PUB_KEY);
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the item_chat_list for this fragment
-        return inflater.inflate(R.layout.fragment_wallet, container, false);
+        // Inflate the layout for this fragment
+        View v = inflater.inflate(R.layout.fragment_create_wallet, container, false);
+        tvWalletAddress = v.findViewById(R.id.tvWalletAddress);
+        tvBalance = v.findViewById(R.id.tvBalance);
+
+        tvWalletAddress.setText(pubKey);
+        tvBalance.setText(getBalance(pubKey));
+
+        return v;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -105,5 +120,27 @@ public class WalletFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    public String getBalance(String pubKey)
+    {
+        //통신할 노드의 주소를 지정해준다.
+        Web3j web3 = Web3jFactory.build(new HttpService("ropsten.infura.io/v3/8ca4afc53327493f838a55d2c210272f"));
+        String result = null;
+        EthGetBalance ethGetBalance;
+        try {
+
+            //이더리움 노드에게 지정한 Address 의 잔액을 조회한다.
+            ethGetBalance = web3.ethGetBalance(pubKey, DefaultBlockParameterName.LATEST).sendAsync().get();
+            BigInteger wei = ethGetBalance.getBalance();
+
+            //wei 단위를 ETH 단위로 변환 한다.
+            result = Convert.fromWei(wei.toString(), Convert.Unit.ETHER).toString();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 }
