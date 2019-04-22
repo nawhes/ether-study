@@ -96,6 +96,8 @@ public class RegisterPubKey extends AppCompatActivity {
         }));
     }
 
+	// 왜 커밋이 안될까
+	
     public String[] createWallet(final String password) {
         String[] result = new String[2];
         try {
