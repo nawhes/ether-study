@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import com.google.android.gms.auth.api.Auth;
@@ -30,11 +31,14 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private GoogleApiClient mGoogleApiClient;
     private static final int RC_SIGN_IN = 9001;
     public SignInButton Google_Login;
+    private Boolean result;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        Log.d("chpark", "in LoginActivity");
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
@@ -53,7 +57,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             public void onClick(View v) {
                 Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
                 startActivityForResult(signInIntent,RC_SIGN_IN);
-
             }
         });
     }
@@ -73,9 +76,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             Snackbar.make(findViewById(R.id.loginactivity), "login", Snackbar.LENGTH_SHORT).show();
 
         } else {
-
-
-            startActivity(new Intent(this,Main2Activity.class));
+            Log.d("chpark", "OnResume-else");
+            startActivity(new Intent(this,CheckEmail.class));
             finish();
         }
     }
@@ -92,9 +94,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 // Google Sign In was successful, authenticate with Firebase
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 firebaseAuthWithGoogle(account);
-                startActivity(new Intent(this,Main2Activity.class));
-                finish();
-
             } catch (ApiException e) {
                 // Google Sign In failed, update UI appropriately
                 // [START_EXCLUDE]
@@ -119,7 +118,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                             String email = FirebaseAuth.getInstance().getCurrentUser().getEmail();
                             String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
                             FirebaseDatabase.getInstance().getReference().child("users").child(uid).setValue(email);
-
+                            startActivity(new Intent(getApplicationContext(),CheckEmail.class));
+                            finish();
                         } else {
                             // If sign in fails, display a message to the user.
                             Snackbar.make(findViewById(R.id.loginactivity), "Authentication Failed.", Snackbar.LENGTH_SHORT).show();

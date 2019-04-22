@@ -35,7 +35,7 @@ public class WalletFragment extends Fragment {
     private static final String ARG_PUB_KEY = "pubKey";
 
     // TODO: Rename and change types of parameters
-    private String pubKey;
+    private String pubKey, balance;
     private TextView tvWalletAddress, tvBalance;
 
     private OnFragmentInteractionListener mListener;
@@ -66,6 +66,7 @@ public class WalletFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             pubKey = getArguments().getString(ARG_PUB_KEY);
+            balance = getBalance(pubKey);
         }
     }
 
@@ -73,12 +74,12 @@ public class WalletFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View v = inflater.inflate(R.layout.fragment_create_wallet, container, false);
+        View v = inflater.inflate(R.layout.fragment_wallet, container, false);
         tvWalletAddress = v.findViewById(R.id.tvWalletAddress);
         tvBalance = v.findViewById(R.id.tvBalance);
 
         tvWalletAddress.setText(pubKey);
-        tvBalance.setText(getBalance(pubKey));
+        if(balance != null) tvBalance.setText(balance);
 
         return v;
     }
@@ -125,7 +126,7 @@ public class WalletFragment extends Fragment {
     public String getBalance(String pubKey)
     {
         //통신할 노드의 주소를 지정해준다.
-        Web3j web3 = Web3jFactory.build(new HttpService("ropsten.infura.io/v3/8ca4afc53327493f838a55d2c210272f"));
+        Web3j web3 = Web3jFactory.build(new HttpService("https://ropsten.infura.io/v3/8f79bace6d6440e3a40300868915d9ec"));
         String result = null;
         EthGetBalance ethGetBalance;
         try {
