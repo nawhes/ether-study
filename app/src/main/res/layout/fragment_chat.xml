@@ -22,28 +22,40 @@
             android:gravity="center">
 
             <TextView
-                android:id="@+id/quiz"
+                android:id="@+id/quiz_question"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="이더리움연구회의 최대 행사는?" />
+                android:paddingBottom="5sp"
+                android:text="이더리움연구회의 최대 행사는?"
+                android:textSize="30sp" />
 
-            <TextView
-                android:id="@+id/select1"
+            <RadioGroup
+                android:id="@+id/quiz_view"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="분과모임" />
+                android:layout_height="wrap_content">
 
-            <TextView
-                android:id="@+id/select2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="엠티" />
+                <RadioButton
+                    android:id="@+id/quiz_view1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="분과모임" />
 
-            <TextView
-                android:id="@+id/select3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="데브스탬프" />
+                <RadioButton
+                    android:id="@+id/quiz_view2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="엠티" />
+
+                <RadioButton
+                    android:id="@+id/quiz_view3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="DevStamp" />
+            </RadioGroup>
+
 
         </LinearLayout>
 
