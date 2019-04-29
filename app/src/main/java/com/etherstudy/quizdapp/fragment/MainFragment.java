@@ -2,13 +2,28 @@ package com.etherstudy.quizdapp.fragment;
 
 import android.content.Context;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.JsonReader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
 
 import com.etherstudy.quizdapp.R;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -27,6 +42,13 @@ public class MainFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    private TextView showInformationTv;
+
+    private int round;
+    private String startDate;
+    private String rewardToken;
+    private int rewardAmount;
 
     private OnFragmentInteractionListener mListener;
 
@@ -62,10 +84,63 @@ public class MainFragment extends Fragment {
     }
 
     @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        AsyncTask.execute(() -> { // 사용자 계정의 공개키 조회
+            try {
+                URL url = new URL("http://101.101.161.251:8001/show");
+                HttpURLConnection conn =
+                        (HttpURLConnection) url.openConnection();
+                conn.setRequestProperty("User-Agent", "QuizShow");
+
+                if (conn.getResponseCode() == 200 || conn.getResponseCode() == 201) {
+                    InputStream responseBody = conn.getInputStream();
+                    InputStreamReader responseBodyReader = new InputStreamReader(responseBody, "UTF-8");
+                    JsonReader jsonReader = new JsonReader(responseBodyReader);
+                    jsonReader.beginObject();
+                    Log.i("chpark", jsonReader.toString());
+                    while (jsonReader.hasNext()) {
+                        String key = jsonReader.nextName();
+                        if (key.equals("round")) {
+                            round = jsonReader.nextInt();
+                        } else if (key.equals("startDate")) {
+                            startDate = jsonReader.nextString();
+                        } else if (key.equals("rewardToken")) {
+                            rewardToken = jsonReader.nextString();
+                        } else if (key.equals("rewardAmount")) {
+                            rewardAmount = jsonReader.nextInt();
+                        }
+                        else jsonReader.skipValue();
+                    }
+                    Log.i("chpark", round + ", " + startDate + ", " + rewardToken + ", " + rewardAmount);
+                    showInformationTv.setText(round + "라운드 퀴즈쇼가 " + startDate + "에 시작됩니다.\n " + "상품은 " + rewardToken + "토큰 " + rewardAmount + "개 입니다!");
+                    jsonReader.close();
+                    responseBodyReader.close();
+                    responseBody.close();
+
+                } else {
+                    Log.d("chpark", conn.getResponseCode() + "");
+                }
+                conn.disconnect();
+            } catch (MalformedURLException e) {
+                System.err.println("URL 프로토콜의 형식이 잘못됨. ex) http://");
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        // Inflate the layout for this fragment
+
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_main, container, false);
+        View v = inflater.inflate(R.layout.fragment_main, container, false);
+        showInformationTv = (TextView) v.findViewById(R.id.tv_quizinfo);
+
+        return v;
     }
 
     // TODO: Rename method, update argument and hook method into UI event

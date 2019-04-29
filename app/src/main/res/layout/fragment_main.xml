@@ -7,6 +7,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <TextView
+        android:id="@+id/tv_quizinfo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="다음 퀴즈쇼는 5월 5일 어린이날 저녁7시에 시작됩니다."
@@ -14,10 +15,4 @@
         android:textSize="20dp"
         android:textAlignment="center"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="QZ토큰 10,000개가 드랍됩니다~"
-        android:textColor="#000000"
-        android:textSize="20dp" />
 </LinearLayout>
