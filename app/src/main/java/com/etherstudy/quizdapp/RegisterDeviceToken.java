@@ -57,7 +57,7 @@ public class RegisterDeviceToken extends AppCompatActivity {
                             @Override
                             public void run() {
                                 try {
-                                    URL url = new URL("http://101.101.161.251:8001/user/deviceToken");
+                                    URL url = new URL(QuizConstants.SERVER_IP + "/user/deviceToken");
                                     HttpURLConnection conn =
                                             (HttpURLConnection) url.openConnection();
                                     conn.setRequestMethod("PATCH");

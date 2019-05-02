@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import com.etherstudy.quizdapp.Main2Activity;
 import com.etherstudy.quizdapp.MainActivity;
+import com.etherstudy.quizdapp.QuizConstants;
 import com.etherstudy.quizdapp.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -94,7 +95,7 @@ public class MyFirebaseMessgingService extends FirebaseMessagingService {
             @Override
             public void run() {
                 try {
-                    URL url = new URL("http://101.101.161.251:8001/user/deviceToken");
+                    URL url = new URL(QuizConstants.SERVER_IP + "/user/deviceToken");
                     HttpURLConnection conn =
                             (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("POST");

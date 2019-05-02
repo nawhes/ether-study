@@ -31,7 +31,7 @@ public class CheckPubKey extends AppCompatActivity {
 
         AsyncTask.execute(() -> { // 사용자 계정에 공개키가 등록되었는지 검사
             try {
-                URL url = new URL("http://101.101.161.251:8001/user/email/" + currentUser.getEmail());
+                URL url = new URL(QuizConstants.SERVER_IP + "/user/email/" + currentUser.getEmail());
                 HttpURLConnection conn =
                         (HttpURLConnection) url.openConnection();
                 conn.setRequestProperty("User-Agent", "QuizShow");

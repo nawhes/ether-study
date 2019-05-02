@@ -34,7 +34,7 @@ public class CheckEmail extends AppCompatActivity {
             @Override
             public void run() {
                 try {
-                    URL url = new URL("http://101.101.161.251:8001/user/email/" + currentUser.getEmail());
+                    URL url = new URL(QuizConstants.SERVER_IP + "/user/email/" + currentUser.getEmail());
                     Log.d("chpark1", currentUser.getEmail()+"");
                     HttpURLConnection conn =
                             (HttpURLConnection) url.openConnection();

@@ -2,11 +2,13 @@ package com.etherstudy.quizdapp.fragment;
 
 import android.content.Context;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
+import android.util.JsonReader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,7 +18,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
+import com.etherstudy.quizdapp.QuizConstants;
+import com.etherstudy.quizdapp.QuizModel;
 import com.etherstudy.quizdapp.R;
 import com.etherstudy.quizdapp.ChatModel;
 import com.google.firebase.auth.FirebaseAuth;
@@ -26,8 +31,18 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -39,6 +54,9 @@ import java.util.List;
  * create an instance of this fragment.
  */
 public class ChatFragment extends Fragment {
+
+    private static final String ARG_ROUND = "round";
+
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private Button button;
@@ -46,6 +64,9 @@ public class ChatFragment extends Fragment {
     private ListView listView;
 
     private String uid;
+    private int round;
+
+    private String str, receiveMsg;
 
     private OnFragmentInteractionListener mListener;
     String chatid;
@@ -75,6 +96,11 @@ public class ChatFragment extends Fragment {
         super.onCreate(savedInstanceState);
         chatid = FirebaseRemoteConfig.getInstance().getString("chatid");
         Log.d("done", "onCreate: "+chatid);
+
+        if (getArguments() != null) {
+            round = Integer.parseInt(getArguments().getString(ARG_ROUND));
+            Toast.makeText(getActivity(), round+" Round", Toast.LENGTH_SHORT).show();
+        }
 
     }
 
@@ -120,6 +146,76 @@ public class ChatFragment extends Fragment {
         return  v;
     }
 
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        AsyncTask.execute(() -> { // 사용자 계정의 공개키 조회
+            try {
+                URL url = new URL(QuizConstants.SERVER_IP + "/quiz/list/" + round);
+
+                HttpURLConnection conn =
+                        (HttpURLConnection) url.openConnection();
+                conn.setRequestProperty("User-Agent", "QuizShow");
+
+                if (conn.getResponseCode() == 200 || conn.getResponseCode() == 201) {
+//                    InputStream responseBody = conn.getInputStream();
+//                    InputStreamReader responseBodyReader = new InputStreamReader(responseBody, "UTF-8");
+//                    JsonReader jsonReader = new JsonReader(responseBodyReader);
+//                    jsonReader.beginArray();
+//                    Log.i("chpark ChatFragment", jsonReader.toString());
+
+
+                    InputStreamReader tmp = new InputStreamReader(conn.getInputStream(), "UTF-8");
+                    BufferedReader reader = new BufferedReader(tmp);
+                    StringBuffer buffer = new StringBuffer();
+                    while ((str = reader.readLine()) != null) {
+                        buffer.append(str);
+                    }
+                    receiveMsg = buffer.toString();
+                    Log.i("receiveMsg : ", receiveMsg);
+
+                    reader.close();
+
+                    Gson gson = new GsonBuilder().create();
+                    QuizModel[] quizModels = gson.fromJson(buffer.toString(), QuizModel[].class);
+                    List<QuizModel> quizList = Arrays.asList(quizModels);
+                    Log.i("ChatFragment", quizModels[0].answer);
+                    Log.i("ChatFragment", quizModels[0].quizAnswerList.get(0).toString());
+//                    while (jsonReader.hasNext()) {
+//                        String key = jsonReader.nextName();
+//                        if (key.equals("round")) {
+//                            round = jsonReader.nextInt();
+//                        } else if (key.equals("startDate")) {
+//                            startDate = jsonReader.nextString();
+//                        } else if (key.equals("rewardToken")) {
+//                            rewardToken = jsonReader.nextString();
+//                        } else if (key.equals("rewardAmount")) {
+//                            rewardAmount = jsonReader.nextInt();
+//                        }
+//                        else jsonReader.skipValue();
+//                    }
+//                    Log.i("chpark", round + ", " + startDate + ", " + rewardToken + ", " + rewardAmount);
+//                    showInformationTv.setText(round + "라운드 퀴즈쇼가 " + startDate + "에 시작됩니다.\n " + "상품은 " + rewardToken + "토큰 " + rewardAmount + "개 입니다!");
+//                    jsonReader.close();
+//                    responseBodyReader.close();
+//                    responseBody.close();
+
+                } else {
+                    Log.d("chpark", conn.getResponseCode() + "");
+                }
+                conn.disconnect();
+            } catch (MalformedURLException e) {
+                System.err.println("URL 프로토콜의 형식이 잘못됨. ex) http://");
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        // Inflate the layout for this fragment
+
+
+    }
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {

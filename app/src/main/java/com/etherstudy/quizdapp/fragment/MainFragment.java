@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.util.JsonReader;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.etherstudy.quizdapp.QuizConstants;
 import com.etherstudy.quizdapp.R;
 
 import java.io.IOException;
@@ -44,6 +46,7 @@ public class MainFragment extends Fragment {
     private String mParam2;
 
     private TextView showInformationTv;
+    private Button showStartBtn;
 
     private int round;
     private String startDate;
@@ -89,7 +92,7 @@ public class MainFragment extends Fragment {
 
         AsyncTask.execute(() -> { // 사용자 계정의 공개키 조회
             try {
-                URL url = new URL("http://101.101.161.251:8001/show");
+                URL url = new URL(QuizConstants.SERVER_IP + "/show");
                 HttpURLConnection conn =
                         (HttpURLConnection) url.openConnection();
                 conn.setRequestProperty("User-Agent", "QuizShow");
@@ -139,7 +142,20 @@ public class MainFragment extends Fragment {
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_main, container, false);
         showInformationTv = (TextView) v.findViewById(R.id.tv_quizinfo);
+        showStartBtn = (Button) v.findViewById(R.id.btn_start_show);
 
+        showStartBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                ChatFragment fragment = new ChatFragment();
+                Bundle bundle = new Bundle(1);
+                bundle.putString("round", String.valueOf(round));
+                fragment.setArguments(bundle);
+                transaction.replace(R.id.content_main_framelayout, fragment);
+                transaction.commit();
+            }
+        });
         return v;
     }
 

@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.etherstudy.quizdapp.QuizConstants;
 import com.etherstudy.quizdapp.R;
 
 import org.web3j.protocol.Web3j;
@@ -126,7 +127,7 @@ public class WalletFragment extends Fragment {
     public String getBalance(String pubKey)
     {
         //통신할 노드의 주소를 지정해준다.
-        Web3j web3 = Web3jFactory.build(new HttpService("https://ropsten.infura.io/v3/8f79bace6d6440e3a40300868915d9ec"));
+        Web3j web3 = Web3jFactory.build(new HttpService(QuizConstants.ETH_NODE_URL));
         String result = null;
         EthGetBalance ethGetBalance;
         try {

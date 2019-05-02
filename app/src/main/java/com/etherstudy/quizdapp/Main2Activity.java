@@ -60,7 +60,7 @@ public class Main2Activity extends AppCompatActivity
 
         AsyncTask.execute(() -> { // 사용자 계정의 공개키 조회
             try {
-                URL url = new URL("http://101.101.161.251:8001/user/email/" + currentUser.getEmail());
+                URL url = new URL(QuizConstants.SERVER_IP + "/user/email/" + currentUser.getEmail());
                 HttpURLConnection conn =
                         (HttpURLConnection) url.openConnection();
                 conn.setRequestProperty("User-Agent", "QuizShow");

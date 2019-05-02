@@ -48,7 +48,7 @@ public class RegisterUser extends AppCompatActivity {
             @Override
             public void run() {
                 try {
-                    URL url = new URL("http://101.101.161.251:8001/user");
+                    URL url = new URL(QuizConstants.SERVER_IP + "/user");
                     HttpURLConnection conn =
                             (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("POST");
