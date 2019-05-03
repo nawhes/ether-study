@@ -159,13 +159,6 @@ public class ChatFragment extends Fragment {
                 conn.setRequestProperty("User-Agent", "QuizShow");
 
                 if (conn.getResponseCode() == 200 || conn.getResponseCode() == 201) {
-//                    InputStream responseBody = conn.getInputStream();
-//                    InputStreamReader responseBodyReader = new InputStreamReader(responseBody, "UTF-8");
-//                    JsonReader jsonReader = new JsonReader(responseBodyReader);
-//                    jsonReader.beginArray();
-//                    Log.i("chpark ChatFragment", jsonReader.toString());
-
-
                     InputStreamReader tmp = new InputStreamReader(conn.getInputStream(), "UTF-8");
                     BufferedReader reader = new BufferedReader(tmp);
                     StringBuffer buffer = new StringBuffer();
@@ -181,25 +174,7 @@ public class ChatFragment extends Fragment {
                     QuizModel[] quizModels = gson.fromJson(buffer.toString(), QuizModel[].class);
                     List<QuizModel> quizList = Arrays.asList(quizModels);
                     Log.i("ChatFragment", quizModels[0].answer);
-                    Log.i("ChatFragment", quizModels[0].quizAnswerList.get(0).toString());
-//                    while (jsonReader.hasNext()) {
-//                        String key = jsonReader.nextName();
-//                        if (key.equals("round")) {
-//                            round = jsonReader.nextInt();
-//                        } else if (key.equals("startDate")) {
-//                            startDate = jsonReader.nextString();
-//                        } else if (key.equals("rewardToken")) {
-//                            rewardToken = jsonReader.nextString();
-//                        } else if (key.equals("rewardAmount")) {
-//                            rewardAmount = jsonReader.nextInt();
-//                        }
-//                        else jsonReader.skipValue();
-//                    }
-//                    Log.i("chpark", round + ", " + startDate + ", " + rewardToken + ", " + rewardAmount);
-//                    showInformationTv.setText(round + "라운드 퀴즈쇼가 " + startDate + "에 시작됩니다.\n " + "상품은 " + rewardToken + "토큰 " + rewardAmount + "개 입니다!");
-//                    jsonReader.close();
-//                    responseBodyReader.close();
-//                    responseBody.close();
+                    Log.i("ChatFragment", quizModels[0].quizAnswerLists.get(0).answerCase);
 
                 } else {
                     Log.d("chpark", conn.getResponseCode() + "");

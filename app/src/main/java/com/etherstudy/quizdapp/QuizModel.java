@@ -12,5 +12,5 @@ public class QuizModel {
     public String createdAt;
     public int round;
 
-    public ArrayList<QuizAnswerModel> quizAnswerList;
+    public ArrayList<QuizAnswerModel> quizAnswerLists;
 }
