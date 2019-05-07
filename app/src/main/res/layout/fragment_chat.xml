@@ -22,28 +22,44 @@
             android:gravity="center">
 
             <TextView
-                android:id="@+id/quiz"
+                android:id="@+id/tv_quiz"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="이더리움연구회의 최대 행사는?" />
 
-            <TextView
-                android:id="@+id/select1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="분과모임" />
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-            <TextView
-                android:id="@+id/select2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="엠티" />
+                <Button
+                    android:id="@+id/btn_select1"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="분과모임" />
 
-            <TextView
-                android:id="@+id/select3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="데브스탬프" />
+                <Button
+                    android:id="@+id/btn_select2"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="엠티" />
+
+                <Button
+                    android:id="@+id/btn_select3"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="데브스탬프" />
+
+                <Button
+                    android:id="@+id/btn_select4"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="데브스탬프" />
+            </LinearLayout>
 
         </LinearLayout>
 
