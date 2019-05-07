@@ -6,7 +6,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -23,19 +25,22 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout linearLayout;
     private FirebaseRemoteConfig mFirebaseRemoteConfig;
 
+    private MainActivity activity;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        activity = this;
+
+        linearLayout = (LinearLayout)findViewById(R.id.splashactivity_linearlayout);
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkVerify();
         } else {
             startApp();
         }
-
-        linearLayout = (LinearLayout)findViewById(R.id.splashactivity_linearlayout);
-
     }
 
     @TargetApi(Build.VERSION_CODES.M)
@@ -74,6 +79,43 @@ public class MainActivity extends AppCompatActivity {
                         displayMessage();
                     }
                 });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
+    {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == 1)
+        {
+            if (grantResults.length > 0)
+            {
+                for (int i=0; i<grantResults.length; ++i)
+                {
+                    if (grantResults[i] == PackageManager.PERMISSION_DENIED)
+                    {
+                        // 하나라도 거부한다면.
+                        new AlertDialog.Builder(this).setTitle("알림").setMessage("권한을 허용해주셔야 앱을 이용할 수 있습니다.")
+                                .setPositiveButton("종료", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                        activity.finish();
+                                    }
+                                }).setNegativeButton("권한 설정", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                                        .setData(Uri.parse("package:" + getApplicationContext().getPackageName()));
+                                getApplicationContext().startActivity(intent);
+                            }
+                        }).setCancelable(false).show();
+
+                        return;
+                    }
+                }
+                startApp();
+            }
+        }
     }
 
     void displayMessage(){

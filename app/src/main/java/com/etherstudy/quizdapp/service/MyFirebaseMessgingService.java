@@ -3,6 +3,7 @@ package com.etherstudy.quizdapp.service;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
@@ -35,6 +36,9 @@ import java.util.Map;
 import javax.net.ssl.HttpsURLConnection;
 
 public class MyFirebaseMessgingService extends FirebaseMessagingService {
+
+    private SharedPreferences sf;
+
     public MyFirebaseMessgingService() {
     }
 
@@ -54,11 +58,17 @@ public class MyFirebaseMessgingService extends FirebaseMessagingService {
                         // Get new Instance ID token
                         String token = task.getResult().getToken();
 
+                        sf = getApplicationContext().getSharedPreferences("wallet", MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sf.edit();
+
+                        editor.putString("deviceToken", token);
                         // Log and toast
                         Log.d("chpark debug", token);
                     }
                 });
-        sendRegistrationToServer(token);
+        if (FirebaseAuth.getInstance().getCurrentUser().getEmail() != null) {
+            sendRegistrationToServer(token);
+        }
     }
 
     @Override
