@@ -1,9 +1,11 @@
 package com.etherstudy.quizdapp.fragment;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.util.JsonReader;
@@ -13,19 +15,44 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.etherstudy.quizdapp.QuizConstants;
 import com.etherstudy.quizdapp.R;
 
+import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.generated.Uint256;
+import org.web3j.crypto.CipherException;
+import org.web3j.crypto.Credentials;
+import org.web3j.crypto.RawTransaction;
+import org.web3j.crypto.TransactionEncoder;
+import org.web3j.crypto.WalletUtils;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.Web3jFactory;
+import org.web3j.protocol.core.DefaultBlockParameter;
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.request.Transaction;
+import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
+import org.web3j.protocol.core.methods.response.EthSendTransaction;
+import org.web3j.protocol.http.HttpService;
+import org.web3j.utils.Numeric;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -47,13 +74,18 @@ public class MainFragment extends Fragment {
 
     private TextView showInformationTv;
     private Button showStartBtn;
+    private Button requestPrizeBtn;
 
     private int round;
     private String startDate;
     private String rewardToken;
     private int rewardAmount;
 
+    private Web3j web3;
+
     private OnFragmentInteractionListener mListener;
+
+    private SharedPreferences sf;
 
     public MainFragment() {
         // Required empty public constructor
@@ -89,6 +121,9 @@ public class MainFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        web3 = Web3jFactory.build(new HttpService(QuizConstants.ETH_NODE_URL));
+
+        sf = getActivity().getSharedPreferences("wallet", Context.MODE_PRIVATE);
 
         AsyncTask.execute(() -> { // 사용자 계정의 공개키 조회
             try {
@@ -117,11 +152,16 @@ public class MainFragment extends Fragment {
                         else jsonReader.skipValue();
                     }
                     Log.i("chpark", round + ", " + startDate + ", " + rewardToken + ", " + rewardAmount);
-                    showInformationTv.setText(round + "라운드 퀴즈쇼가 " + startDate + "에 시작됩니다.\n " + "상품은 " + rewardToken + "토큰 " + rewardAmount + "개 입니다!");
                     jsonReader.close();
                     responseBodyReader.close();
                     responseBody.close();
 
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            showInformationTv.setText(round + "라운드 퀴즈쇼가 " + startDate + "에 시작됩니다.\n " + "상품은 " + rewardToken + "토큰 " + rewardAmount + "개 입니다!");
+                        }
+                    });
                 } else {
                     Log.d("chpark", conn.getResponseCode() + "");
                 }
@@ -143,6 +183,55 @@ public class MainFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_main, container, false);
         showInformationTv = (TextView) v.findViewById(R.id.tv_quizinfo);
         showStartBtn = (Button) v.findViewById(R.id.btn_start_show);
+        requestPrizeBtn = (Button) v.findViewById(R.id.btn_request_prize);
+
+        BigInteger reward = new BigInteger(String.valueOf(25));
+        requestPrizeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AsyncTask.execute(() -> {
+                    String myAddress = sf.getString("walletPubKey", "null");
+                    Function function = new Function(
+                            "transferFrom",
+                            Arrays.asList(new Address(QuizConstants.TOKEN_HOLDER_ADDRESS), new Address(myAddress),new Uint256(QuizConstants.CONTRACT_DECIMAL.multiply(reward))),
+                            Collections.<TypeReference<?>>emptyList());
+                    String encodedFunction = FunctionEncoder.encode(function);
+                    EthGetTransactionCount ethGetTransactionCount = null;
+                    try {
+                        ethGetTransactionCount = web3.ethGetTransactionCount(
+                                myAddress, DefaultBlockParameterName.LATEST).send();
+                        BigInteger nonce = ethGetTransactionCount.getTransactionCount();
+
+                        RawTransaction rawTransaction = RawTransaction.createTransaction(
+                                nonce,
+                                QuizConstants.GAS_PRICE, QuizConstants.GAS_LIMIT, QuizConstants.QUIZ_CONTRACT_ADDRESS,
+                                encodedFunction);
+
+//                        Credentials credentials = Credentials.create(QuizConstants.TOKEN_HOLDER_PK);
+
+                        Credentials credentials = WalletUtils.loadCredentials(sf.getString("walletPassword", "1234"), sf.getString("walletPath", "null"));
+                        byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
+                        String hexValue = Numeric.toHexString(signedMessage);
+                        EthSendTransaction ethSendTransaction = web3.ethSendRawTransaction(hexValue).sendAsync().get();
+
+                        String transactionHash = ethSendTransaction.getTransactionHash();
+                        if (ethSendTransaction.hasError()) {
+                            throw new RuntimeException("Error processing transaction request: "
+                                    + ethSendTransaction.getError().getMessage());
+                        }
+                        Log.i("chpark", "transferFrom txid: " + transactionHash);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
+                    } catch (CipherException e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
+        });
 
         showStartBtn.setOnClickListener(new View.OnClickListener() {
             @Override
