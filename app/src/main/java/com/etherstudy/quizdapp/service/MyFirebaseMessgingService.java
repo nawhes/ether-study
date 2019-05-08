@@ -66,7 +66,7 @@ public class MyFirebaseMessgingService extends FirebaseMessagingService {
                         Log.d("chpark debug", token);
                     }
                 });
-        if (FirebaseAuth.getInstance().getCurrentUser().getEmail() != null) {
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             sendRegistrationToServer(token);
         }
     }

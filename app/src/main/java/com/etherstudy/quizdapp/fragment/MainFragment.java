@@ -47,11 +47,14 @@ import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -151,7 +154,29 @@ public class MainFragment extends Fragment {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            showInformationTv.setText(round + "라운드 퀴즈쇼가 " + startDate + "에 시작됩니다.\n " + "상품은 " + rewardToken + "토큰 " + rewardAmount + "개 입니다!");
+
+//                            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); // your format
+//                            try {
+//                                Date date = format.parse(startDate);
+                                showInformationTv.setText(round + "라운드 퀴즈쇼가 " + startDate + "에 시작됩니다.\n " + "상품은 " + rewardToken + "토큰 " + rewardAmount + "개 입니다!");
+//                            } catch (ParseException e) {
+//                                e.printStackTrace();
+//                            }
+
+//                            java.util.Date date = new Date(startDate);
+//                            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//                            String format = formatter.format(date);
+
+//                            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.KOREA);
+//                            Date date = null;
+//                            try {
+//                                date = formatter.parse(startDate);
+//                                System.out.println(date);
+//                            } catch (ParseException e) {
+//                                e.printStackTrace();
+//                            }
+
+
                         }
                     });
                 } else {
