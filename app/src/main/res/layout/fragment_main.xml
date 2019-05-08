@@ -21,10 +21,4 @@
         android:layout_height="wrap_content"
         android:text="퀴즈쇼 입장" />
 
-    <Button
-        android:id="@+id/btn_request_prize"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="상품 수령" />
-
 </LinearLayout>

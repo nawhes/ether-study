@@ -28,6 +28,7 @@
                 android:text="이더리움연구회의 최대 행사는?" />
 
             <LinearLayout
+                android:id="@+id/layout_btns"
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
@@ -60,6 +61,13 @@
                     android:layout_height="wrap_content"
                     android:text="데브스탬프" />
             </LinearLayout>
+
+            <Button
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/btn_request_reward"
+                android:text="상금 받기"/>
 
         </LinearLayout>
 

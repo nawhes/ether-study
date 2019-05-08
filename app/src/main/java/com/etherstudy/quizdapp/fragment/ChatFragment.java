@@ -2,6 +2,7 @@ package com.etherstudy.quizdapp.fragment;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -17,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -40,20 +42,40 @@ import com.google.gson.GsonBuilder;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.generated.Uint256;
+import org.web3j.crypto.CipherException;
+import org.web3j.crypto.Credentials;
+import org.web3j.crypto.RawTransaction;
+import org.web3j.crypto.TransactionEncoder;
+import org.web3j.crypto.WalletUtils;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.Web3jFactory;
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
+import org.web3j.protocol.core.methods.response.EthSendTransaction;
+import org.web3j.protocol.http.HttpService;
+import org.web3j.utils.Numeric;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ExecutionException;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -66,14 +88,20 @@ import java.util.TimerTask;
 public class ChatFragment extends Fragment {
 
     private static final String ARG_ROUND = "round";
+    private static final String ARG_TOKEN = "rewardToken";
+    private static final String ARG_AMOUNT = "rewardAmount";
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+
+    private Web3j web3;
 
     private Button select1Btn;
     private Button select2Btn;
     private Button select3Btn;
     private Button select4Btn;
+    private LinearLayout selectBtnLayout;
+    private Button getRewardBtn;
 
     private TextView quizTv;
 
@@ -83,6 +111,9 @@ public class ChatFragment extends Fragment {
 
     private String uid;
     private int round;
+    private int rewardAmount;
+    private String rewardToken;
+
     private int quizNumber = 0;
 
     private String str, receiveMsg;
@@ -98,11 +129,14 @@ public class ChatFragment extends Fragment {
 
     private int rightCount;
     private int wrongCount;
+    private int finalRewardAmount;
 
     private Timer nextQuizTimer;
     private Timer sendAnswerTimer;
 
     private boolean isWinner;
+
+    private SharedPreferences sf;
 
     public ChatFragment() {
         // Required empty public constructor
@@ -128,10 +162,13 @@ public class ChatFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         chatid = FirebaseRemoteConfig.getInstance().getString("chatid");
+
         Log.d("done", "onCreate: "+chatid);
 
         if (getArguments() != null) {
             round = Integer.parseInt(getArguments().getString(ARG_ROUND));
+            rewardToken = getArguments().getString(ARG_TOKEN);
+            rewardAmount = Integer.parseInt(getArguments().getString(ARG_AMOUNT));
             Toast.makeText(getActivity(), round+" Round", Toast.LENGTH_SHORT).show();
         }
 
@@ -147,10 +184,12 @@ public class ChatFragment extends Fragment {
         select2Btn = (Button) v.findViewById(R.id.btn_select2);
         select3Btn = (Button) v.findViewById(R.id.btn_select3);
         select4Btn = (Button) v.findViewById(R.id.btn_select4);
-
+        selectBtnLayout = v.findViewById(R.id.layout_btns);
         listView = (ListView) v.findViewById(R.id.fragment_chat_listview);
         button = (Button) v.findViewById(R.id.fragment_chat_button);
         editText = (EditText) v.findViewById(R.id.fragment_chat_editText);
+        getRewardBtn = v.findViewById(R.id.btn_request_reward);
+
         uid = FirebaseAuth.getInstance().getCurrentUser().getEmail();
 
         select1Btn.setOnClickListener(view -> {
@@ -177,6 +216,49 @@ public class ChatFragment extends Fragment {
             ChatModel comment = new ChatModel(uid, editText.getText().toString());
             FirebaseDatabase.getInstance().getReference().child(chatid).push().setValue(comment);
             editText.setText("");
+        });
+
+        getRewardBtn.setOnClickListener(view -> {
+            AsyncTask.execute(() -> {
+                BigInteger reward = new BigInteger(String.valueOf(finalRewardAmount));
+                String myAddress = sf.getString("walletPubKey", "null");
+                Function function = new Function(
+                        "transferFrom",
+                        Arrays.asList(new Address(QuizConstants.TOKEN_HOLDER_ADDRESS), new Address(myAddress),new Uint256(QuizConstants.CONTRACT_DECIMAL.multiply(reward))),
+                        Collections.<TypeReference<?>>emptyList());
+                String encodedFunction = FunctionEncoder.encode(function);
+                EthGetTransactionCount ethGetTransactionCount = null;
+                try {
+                    ethGetTransactionCount = web3.ethGetTransactionCount(
+                            myAddress, DefaultBlockParameterName.LATEST).send();
+                    BigInteger nonce = ethGetTransactionCount.getTransactionCount();
+
+                    RawTransaction rawTransaction = RawTransaction.createTransaction(
+                            nonce,
+                            QuizConstants.GAS_PRICE, QuizConstants.GAS_LIMIT, QuizConstants.QUIZ_CONTRACT_ADDRESS,
+                            encodedFunction);
+
+                    Credentials credentials = WalletUtils.loadCredentials(sf.getString("walletPassword", "1234"), sf.getString("walletPath", "null"));
+                    byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
+                    String hexValue = Numeric.toHexString(signedMessage);
+                    EthSendTransaction ethSendTransaction = web3.ethSendRawTransaction(hexValue).sendAsync().get();
+
+                    String transactionHash = ethSendTransaction.getTransactionHash();
+                    if (ethSendTransaction.hasError()) {
+                        throw new RuntimeException("Error processing transaction request: "
+                                + ethSendTransaction.getError().getMessage());
+                    }
+                    Log.i("chpark", "transferFrom txid: " + transactionHash);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (CipherException e) {
+                    e.printStackTrace();
+                }
+            });
         });
 
         final ArrayAdapter adapter = new ArrayAdapter(getActivity(), R.layout.item_chat_list,R.id.item_chat_textview);
@@ -287,7 +369,10 @@ public class ChatFragment extends Fragment {
                     if (sendAnswerTimer != null) {
                         sendAnswerTimer.cancel();
                     }
-                    getActivity().runOnUiThread(() -> quizTv.setText("당신은 탈락하였습니다!"));
+                    getActivity().runOnUiThread(() -> {
+                        quizTv.setText("당신은 탈락하였습니다!");
+                        selectBtnLayout.setVisibility(View.INVISIBLE);
+                    });
                 }
                 quizNumber++;
             }
@@ -323,17 +408,24 @@ public class ChatFragment extends Fragment {
 
                     getActivity().runOnUiThread(() -> {
                         if (quizNumber < totalQuizNumber) {
-                            quizTv.setText("정답자: " + quizAnswerResultModel.rightCount + "명, 오답자: " + quizAnswerResultModel.wrongCount + "명 입니다.\n" +
-                                    "잠시 후 다음 문제가 나옵니다.");
-
                             if (isWinner) {
                                 if (nextQuizTimer == null) {
                                     nextQuizTimer = new Timer();
                                 }
-                                nextQuizTimer.schedule(showNextQuizTask, 5000);
+                                quizTv.setText("정답을 맞췄습니다!\n 정답자: " + quizAnswerResultModel.rightCount + "명, 오답자: " + quizAnswerResultModel.wrongCount + "명 입니다.\n" +
+                                        "잠시 후 다음 문제가 나옵니다.");
+                            } else {
+                                quizTv.setText("정답자: " + quizAnswerResultModel.rightCount + "명, 오답자: " + quizAnswerResultModel.wrongCount + "명 입니다.\n" +
+                                        "당신은 탈락했으므로 문제를 풀 수 없습니다.");
+                                selectBtnLayout.setVisibility(View.GONE);
                             }
+                            nextQuizTimer.schedule(showNextQuizTask, 5000);
                         } else {
-                            quizTv.setText("최종 우승자는 " + rightCount + "명입니다! 축하드립니다!!");
+                            finalRewardAmount = (int)(rewardAmount / rightCount);
+                            quizTv.setText("당신을 포함한 최종 우승자는 " + rightCount + "명입니다! 축하드립니다!!\n" +
+                                    "우승자에게는 " + finalRewardAmount + "개의 " + rewardToken + "이 수여됩니다.");
+                            selectBtnLayout.setVisibility(View.GONE);
+                            getRewardBtn.setVisibility(View.VISIBLE);
                             sendAnswerTimer.cancel();
                         }
                     });
@@ -369,6 +461,8 @@ public class ChatFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        web3 = Web3jFactory.build(new HttpService(QuizConstants.ETH_NODE_URL));
+        sf = getActivity().getSharedPreferences("wallet", Context.MODE_PRIVATE);
 
         AsyncTask.execute(() -> {
             try {
