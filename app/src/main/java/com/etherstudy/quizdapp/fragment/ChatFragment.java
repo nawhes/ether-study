@@ -69,6 +69,7 @@ import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -162,7 +163,7 @@ public class ChatFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         chatid = FirebaseRemoteConfig.getInstance().getString("chatid");
-
+        FirebaseDatabase.getInstance().getReference().child(chatid).removeValue();
         Log.d("done", "onCreate: "+chatid);
 
         if (getArguments() != null) {
@@ -179,15 +180,15 @@ public class ChatFragment extends Fragment {
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_chat, container, false);
 
-        quizTv = (TextView) v.findViewById(R.id.tv_quiz);
-        select1Btn = (Button) v.findViewById(R.id.btn_select1);
-        select2Btn = (Button) v.findViewById(R.id.btn_select2);
-        select3Btn = (Button) v.findViewById(R.id.btn_select3);
-        select4Btn = (Button) v.findViewById(R.id.btn_select4);
+        quizTv = v.findViewById(R.id.tv_quiz);
+        select1Btn = v.findViewById(R.id.btn_select1);
+        select2Btn = v.findViewById(R.id.btn_select2);
+        select3Btn = v.findViewById(R.id.btn_select3);
+        select4Btn = v.findViewById(R.id.btn_select4);
         selectBtnLayout = v.findViewById(R.id.layout_btns);
-        listView = (ListView) v.findViewById(R.id.fragment_chat_listview);
-        button = (Button) v.findViewById(R.id.fragment_chat_button);
-        editText = (EditText) v.findViewById(R.id.fragment_chat_editText);
+        listView = v.findViewById(R.id.fragment_chat_listview);
+        button = v.findViewById(R.id.fragment_chat_button);
+        editText = v.findViewById(R.id.fragment_chat_editText);
         getRewardBtn = v.findViewById(R.id.btn_request_reward);
 
         uid = FirebaseAuth.getInstance().getCurrentUser().getEmail();
@@ -225,7 +226,7 @@ public class ChatFragment extends Fragment {
                 Function function = new Function(
                         "transferFrom",
                         Arrays.asList(new Address(QuizConstants.TOKEN_HOLDER_ADDRESS), new Address(myAddress),new Uint256(QuizConstants.CONTRACT_DECIMAL.multiply(reward))),
-                        Collections.<TypeReference<?>>emptyList());
+                        Collections.emptyList());
                 String encodedFunction = FunctionEncoder.encode(function);
                 EthGetTransactionCount ethGetTransactionCount = null;
                 try {
@@ -290,7 +291,6 @@ public class ChatFragment extends Fragment {
             sendAnswer();
         }
     };
-
     TimerTask showNextQuizTask = new TimerTask() {
         @Override
         public void run() {
@@ -340,7 +340,7 @@ public class ChatFragment extends Fragment {
                 conn.setDoOutput(true);
 
                 OutputStream os = conn.getOutputStream();
-                os.write(jsonObject.toString().getBytes("UTF-8"));
+                os.write(jsonObject.toString().getBytes(StandardCharsets.UTF_8));
                 os.flush();
                 os.close();
 
@@ -363,16 +363,6 @@ public class ChatFragment extends Fragment {
                 setBtnsClickable(true);
                 if (!quizModels[quizNumber].answer.equals(selectAnswer)) {
                     Log.i("chpark", "탈락!!!");
-                    if (nextQuizTimer != null) {
-                        nextQuizTimer.cancel();
-                    }
-                    if (sendAnswerTimer != null) {
-                        sendAnswerTimer.cancel();
-                    }
-                    getActivity().runOnUiThread(() -> {
-                        quizTv.setText("당신은 탈락하였습니다!");
-                        selectBtnLayout.setVisibility(View.INVISIBLE);
-                    });
                 }
                 quizNumber++;
             }
@@ -390,7 +380,7 @@ public class ChatFragment extends Fragment {
                 conn.setRequestProperty("User-Agent", "QuizShow");
 
                 if (conn.getResponseCode() == 200 || conn.getResponseCode() == 201) {
-                    InputStreamReader tmp = new InputStreamReader(conn.getInputStream(), "UTF-8");
+                    InputStreamReader tmp = new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8);
                     BufferedReader reader = new BufferedReader(tmp);
                     StringBuffer buffer = new StringBuffer();
                     while ((str = reader.readLine()) != null) {
@@ -409,23 +399,27 @@ public class ChatFragment extends Fragment {
                     getActivity().runOnUiThread(() -> {
                         if (quizNumber < totalQuizNumber) {
                             if (isWinner) {
-                                if (nextQuizTimer == null) {
-                                    nextQuizTimer = new Timer();
-                                }
                                 quizTv.setText("정답을 맞췄습니다!\n 정답자: " + quizAnswerResultModel.rightCount + "명, 오답자: " + quizAnswerResultModel.wrongCount + "명 입니다.\n" +
                                         "잠시 후 다음 문제가 나옵니다.");
                             } else {
                                 quizTv.setText("정답자: " + quizAnswerResultModel.rightCount + "명, 오답자: " + quizAnswerResultModel.wrongCount + "명 입니다.\n" +
                                         "당신은 탈락했으므로 문제를 풀 수 없습니다.");
-                                selectBtnLayout.setVisibility(View.GONE);
+                                setBtnsClickable(false);
                             }
-                            nextQuizTimer.schedule(showNextQuizTask, 5000);
+                            if (nextQuizTimer == null) {
+                                nextQuizTimer = new Timer();
+                                nextQuizTimer.schedule(showNextQuizTask, 5000);
+                            }
                         } else {
-                            finalRewardAmount = (int)(rewardAmount / rightCount);
-                            quizTv.setText("당신을 포함한 최종 우승자는 " + rightCount + "명입니다! 축하드립니다!!\n" +
-                                    "우승자에게는 " + finalRewardAmount + "개의 " + rewardToken + "이 수여됩니다.");
-                            selectBtnLayout.setVisibility(View.GONE);
-                            getRewardBtn.setVisibility(View.VISIBLE);
+                            if (rightCount == 0) {
+                                quizTv.setText("이번 라운드의 우승자는 없습니다 ㅠㅠ");
+                            } else {
+                                finalRewardAmount = rewardAmount / rightCount;
+                                quizTv.setText("당신을 포함한 최종 우승자는 " + rightCount + "명입니다! 축하드립니다!!\n" +
+                                        "우승자에게는 " + finalRewardAmount + "개의 " + rewardToken + "이 수여됩니다.");
+                                selectBtnLayout.setVisibility(View.GONE);
+                                getRewardBtn.setVisibility(View.VISIBLE);
+                            }
                             sendAnswerTimer.cancel();
                         }
                     });
@@ -446,6 +440,7 @@ public class ChatFragment extends Fragment {
     private void setQuestionByQuizNumber() {
         getActivity().runOnUiThread(() -> {
             if (quizNumber < totalQuizNumber) {
+                selectAnswer = null;
                 select1Btn.setText(quizModels[quizNumber].quizAnswerLists.get(0).answerCase);
                 select2Btn.setText(quizModels[quizNumber].quizAnswerLists.get(1).answerCase);
                 select3Btn.setText(quizModels[quizNumber].quizAnswerLists.get(2).answerCase);
@@ -473,7 +468,7 @@ public class ChatFragment extends Fragment {
                 conn.setRequestProperty("User-Agent", "QuizShow");
 
                 if (conn.getResponseCode() == 200 || conn.getResponseCode() == 201) {
-                    InputStreamReader tmp = new InputStreamReader(conn.getInputStream(), "UTF-8");
+                    InputStreamReader tmp = new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8);
                     BufferedReader reader = new BufferedReader(tmp);
                     StringBuffer buffer = new StringBuffer();
                     while ((str = reader.readLine()) != null) {
