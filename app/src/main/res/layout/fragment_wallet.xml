@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:orientation="vertical"
     android:layout_height="match_parent"
     tools:context=".fragment.WalletFragment">
 
@@ -14,11 +15,18 @@
         android:layout_centerHorizontal="true" />
 
     <TextView
-        android:id="@+id/tvBalance"
+        android:id="@+id/tv_eth_balance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/tvWalletAddress"
-        android:layout_centerHorizontal="true"
         android:text="@string/balance" />
 
-</RelativeLayout>
+
+    <TextView
+        android:id="@+id/tv_token_balance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/balance" />
+
+
+
+</LinearLayout>

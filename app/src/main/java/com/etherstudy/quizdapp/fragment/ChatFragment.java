@@ -1,16 +1,12 @@
 package com.etherstudy.quizdapp.fragment;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.RecyclerView;
-import android.util.JsonReader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,19 +15,16 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.etherstudy.quizdapp.Main2Activity;
+import com.etherstudy.quizdapp.ChatModel;
 import com.etherstudy.quizdapp.QuizAnswerResultModel;
 import com.etherstudy.quizdapp.QuizConstants;
 import com.etherstudy.quizdapp.QuizModel;
 import com.etherstudy.quizdapp.R;
-import com.etherstudy.quizdapp.ChatModel;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
@@ -43,7 +36,6 @@ import com.google.gson.GsonBuilder;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.web3j.abi.FunctionEncoder;
-import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.generated.Uint256;
@@ -53,7 +45,6 @@ import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.TransactionEncoder;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.Web3jFactory;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
@@ -62,7 +53,6 @@ import org.web3j.utils.Numeric;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.math.BigInteger;
@@ -70,10 +60,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
@@ -456,7 +444,7 @@ public class ChatFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        web3 = Web3jFactory.build(new HttpService(QuizConstants.ETH_NODE_URL));
+        web3 = Web3j.build(new HttpService(QuizConstants.ETH_NODE_URL));
         sf = getActivity().getSharedPreferences("wallet", Context.MODE_PRIVATE);
 
         AsyncTask.execute(() -> {

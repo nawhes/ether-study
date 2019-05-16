@@ -14,12 +14,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.etherstudy.quizdapp.QuizConstants;
+import com.etherstudy.quizdapp.QuizModel;
+import com.etherstudy.quizdapp.QuizShowTokenContract;
 import com.etherstudy.quizdapp.R;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
@@ -28,20 +33,32 @@ import org.web3j.crypto.TransactionEncoder;
 import org.web3j.crypto.Wallet;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.Web3jFactory;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthGetBalance;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.http.HttpService;
+import org.web3j.tx.Contract;
+import org.web3j.tx.gas.DefaultGasProvider;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Numeric;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.math.BigInteger;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Timer;
 import java.util.concurrent.ExecutionException;
+
+import static com.etherstudy.quizdapp.QuizConstants.GAS_LIMIT;
+import static com.etherstudy.quizdapp.QuizConstants.GAS_PRICE;
+import static com.etherstudy.quizdapp.QuizConstants.QUIZ_CONTRACT_ADDRESS;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -58,9 +75,12 @@ public class WalletFragment extends Fragment {
 
     // TODO: Rename and change types of parameters
     private String pubKey, balance;
-    private TextView tvWalletAddress, tvBalance;
+    private TextView tvWalletAddress, tvEthBalance, tvTokenBalance;
 
     private OnFragmentInteractionListener mListener;
+
+    private Web3j web3;
+    private String tokenBalance;
 
     public WalletFragment() {
         // Required empty public constructor
@@ -88,7 +108,10 @@ public class WalletFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             pubKey = getArguments().getString(ARG_PUB_KEY);
-            balance = getBalance(pubKey);
+
+            web3 = Web3j.build(new HttpService(QuizConstants.ETH_NODE_URL));
+            balance = getBalance();
+            tokenBalance = getTokenBalance();
         }
     }
 
@@ -98,10 +121,10 @@ public class WalletFragment extends Fragment {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_wallet, container, false);
         tvWalletAddress = v.findViewById(R.id.tvWalletAddress);
-        tvBalance = v.findViewById(R.id.tvBalance);
+        tvEthBalance = v.findViewById(R.id.tv_eth_balance);
+        tvTokenBalance = v.findViewById(R.id.tv_token_balance);
 
         tvWalletAddress.setText(pubKey);
-        if(balance != null) tvBalance.setText(balance);
 
         return v;
     }
@@ -145,12 +168,12 @@ public class WalletFragment extends Fragment {
         void onFragmentInteraction(Uri uri);
     }
 
-    public String getBalance(String pubKey)
+    public String getBalance()
     {
 
 
         //통신할 노드의 주소를 지정해준다.
-        Web3j web3 = Web3jFactory.build(new HttpService(QuizConstants.ETH_NODE_URL));
+
         String result = null;
         EthGetBalance ethGetBalance;
         try {
@@ -167,5 +190,30 @@ public class WalletFragment extends Fragment {
             e.printStackTrace();
         }
         return result;
+    }
+
+    public String getTokenBalance() {
+        AsyncTask.execute(() -> {
+            try {
+                Credentials credentials = Credentials.create(QuizConstants.TOKEN_HOLDER_PK);
+                QuizShowTokenContract contract = QuizShowTokenContract.load(QUIZ_CONTRACT_ADDRESS, web3, credentials, GAS_PRICE, GAS_LIMIT);
+                BigInteger bigInteger = contract.balanceOf(pubKey).send();
+                tokenBalance = String.valueOf(bigInteger.divide(QuizConstants.CONTRACT_DECIMAL));
+                Log.i("chpark", "token Balance: " + tokenBalance);
+
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(balance != null) tvEthBalance.setText("이더리움 잔액: " + balance);
+                        if(tokenBalance != null) tvTokenBalance.setText("QT 토큰 잔액: " + tokenBalance);
+                    }
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        return tokenBalance;
     }
 }

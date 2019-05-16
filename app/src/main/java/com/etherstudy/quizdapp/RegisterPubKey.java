@@ -3,13 +3,12 @@ package com.etherstudy.quizdapp;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -27,7 +26,6 @@ import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.TransactionEncoder;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.Web3jFactory;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
@@ -66,7 +64,7 @@ public class RegisterPubKey extends AppCompatActivity {
 
         sf = getSharedPreferences("wallet",MODE_PRIVATE);
 
-        web3 = Web3jFactory.build(new HttpService(QuizConstants.ETH_NODE_URL));
+        web3 = Web3j.build(new HttpService(QuizConstants.ETH_NODE_URL));
 
         Log.d("chpark", "in RegisterPubkey");
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
