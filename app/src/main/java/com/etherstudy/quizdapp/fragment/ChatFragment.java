@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -122,6 +123,7 @@ public class ChatFragment extends Fragment {
 
     private Timer nextQuizTimer;
     private Timer sendAnswerTimer;
+    private Timer endQuizTimer;
 
     private boolean isWinner;
 
@@ -179,7 +181,12 @@ public class ChatFragment extends Fragment {
         editText = v.findViewById(R.id.fragment_chat_editText);
         getRewardBtn = v.findViewById(R.id.btn_request_reward);
 
-        uid = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+        if (FirebaseAuth.getInstance().getCurrentUser().getDisplayName() != null) {
+            uid = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
+        } else {
+            uid = "unknown";
+        }
+
 
         select1Btn.setOnClickListener(view -> {
             setBtnsClickable(false);
@@ -217,6 +224,7 @@ public class ChatFragment extends Fragment {
                         Collections.emptyList());
                 String encodedFunction = FunctionEncoder.encode(function);
                 EthGetTransactionCount ethGetTransactionCount = null;
+
                 try {
                     ethGetTransactionCount = web3.ethGetTransactionCount(
                             myAddress, DefaultBlockParameterName.LATEST).send();
@@ -403,11 +411,19 @@ public class ChatFragment extends Fragment {
                                 quizTv.setText("이번 라운드의 우승자는 없습니다 ㅠㅠ");
                             } else {
                                 finalRewardAmount = rewardAmount / rightCount;
-                                quizTv.setText("당신을 포함한 최종 우승자는 " + rightCount + "명입니다! 축하드립니다!!\n" +
+                                quizTv.setText("당신을 포함한 최종 우승자는 " + rightCount + "명입니다!\n축하드립니다!!\n" +
                                         "우승자에게는 " + finalRewardAmount + "개의 " + rewardToken + "이 수여됩니다.");
                                 selectBtnLayout.setVisibility(View.GONE);
                                 getRewardBtn.setVisibility(View.VISIBLE);
                             }
+                            new Timer().schedule(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                                    fragmentManager.beginTransaction().remove(ChatFragment.this).commit();
+                                    fragmentManager.popBackStack();
+                                }
+                            }, 7000);
                             sendAnswerTimer.cancel();
                         }
                     });
@@ -527,3 +543,4 @@ public class ChatFragment extends Fragment {
         void onFragmentInteraction(Uri uri);
     }
 }
+

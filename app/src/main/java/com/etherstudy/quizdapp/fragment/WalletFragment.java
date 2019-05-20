@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
+import android.text.util.Linkify;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -55,6 +56,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Timer;
 import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.etherstudy.quizdapp.QuizConstants.GAS_LIMIT;
 import static com.etherstudy.quizdapp.QuizConstants.GAS_PRICE;
@@ -125,6 +128,10 @@ public class WalletFragment extends Fragment {
         tvTokenBalance = v.findViewById(R.id.tv_token_balance);
 
         tvWalletAddress.setText(pubKey);
+
+        Linkify.TransformFilter mTransform = (match, url) -> "";
+        Pattern pattern1 = Pattern.compile(pubKey);
+        Linkify.addLinks(tvWalletAddress, pattern1, "https://ropsten.etherscan.io/address/" + pubKey,null, mTransform);
 
         return v;
     }
@@ -204,8 +211,8 @@ public class WalletFragment extends Fragment {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        if(balance != null) tvEthBalance.setText("이더리움 잔액: " + balance);
-                        if(tokenBalance != null) tvTokenBalance.setText("QT 토큰 잔액: " + tokenBalance);
+                        if(balance != null) tvEthBalance.setText("이더리움 잔액: " + balance + "ETH");
+                        if(tokenBalance != null) tvTokenBalance.setText("QT 토큰 잔액: " + tokenBalance + "QT");
                     }
                 });
             } catch (IOException e) {

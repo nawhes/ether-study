@@ -1,29 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:gravity="center"
     android:layout_height="match_parent"
     tools:context=".RegisterPubKey">
 
+    <TextView
+        android:gravity="center"
+        android:textSize="20sp"
+        android:text="지갑 생성을 위한 비밀번호를 입력해주세요.\n 비밀번호는 당신의 핸드폰에만 저장이됩니다."
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
     <EditText
         android:id="@+id/etPassword"
-        android:layout_width="300dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp"
+        android:gravity="center"
         android:inputType="textPassword"
         android:hint="@string/hint_password"
         android:textAlignment="center" />
 
     <Button
+        android:layout_marginTop="20dp"
         android:id="@+id/btnCreateWallet"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/etPassword"
         android:layout_centerHorizontal="true"
         android:gravity="center"
         android:text="@string/create_wallet"
         style="?android:attr/buttonBarButtonStyle"/>
 
-</RelativeLayout>
+</LinearLayout>

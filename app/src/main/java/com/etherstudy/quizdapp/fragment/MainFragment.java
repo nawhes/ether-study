@@ -84,10 +84,26 @@ public class MainFragment extends Fragment {
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View v = inflater.inflate(R.layout.fragment_main, container, false);
+        showInformationTv = v.findViewById(R.id.tv_quizinfo);
+        showStartBtn = v.findViewById(R.id.btn_start_show);
+        Log.i("MainFragment", "onCreateView");
+        showStartBtn.setOnClickListener(v1 -> {
+            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+            ChatFragment fragment = new ChatFragment();
+            Bundle bundle = new Bundle(1);
+            bundle.putString("round", String.valueOf(round));
+            bundle.putString("rewardToken", rewardToken);
+            bundle.putString("rewardAmount", String.valueOf(rewardAmount));
+            fragment.setArguments(bundle);
+            transaction.replace(R.id.content_main_framelayout, fragment);
+            transaction.addToBackStack("MainFragment");
+            transaction.commit();
+        });
 
-        AsyncTask.execute(() -> { // 사용자 계정의 공개키 조회
+        AsyncTask.execute(() -> {
             try {
                 URL url = new URL(QuizConstants.SERVER_IP + "/show");
                 HttpURLConnection conn =
@@ -118,34 +134,7 @@ public class MainFragment extends Fragment {
                     responseBodyReader.close();
                     responseBody.close();
 
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-
-//                            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); // your format
-//                            try {
-//                                Date date = format.parse(startDate);
-                                showInformationTv.setText(round + "라운드 퀴즈쇼가 " + startDate + "에 시작됩니다.\n " + "상품은 " + rewardToken + "토큰 " + rewardAmount + "개 입니다!");
-//                            } catch (ParseException e) {
-//                                e.printStackTrace();
-//                            }
-
-//                            java.util.Date date = new Date(startDate);
-//                            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//                            String format = formatter.format(date);
-
-//                            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.KOREA);
-//                            Date date = null;
-//                            try {
-//                                date = formatter.parse(startDate);
-//                                System.out.println(date);
-//                            } catch (ParseException e) {
-//                                e.printStackTrace();
-//                            }
-
-
-                        }
-                    });
+                    getActivity().runOnUiThread(() -> showInformationTv.setText(round + "라운드 퀴즈쇼가 " + startDate + "에 시작됩니다.\n " + "상품은 " + rewardToken + "토큰 " + rewardAmount + "개 입니다!"));
                 } else {
                     Log.d("chpark", conn.getResponseCode() + "");
                 }
@@ -157,31 +146,7 @@ public class MainFragment extends Fragment {
                 e.printStackTrace();
             }
         });
-        // Inflate the layout for this fragment
 
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_main, container, false);
-        showInformationTv = (TextView) v.findViewById(R.id.tv_quizinfo);
-        showStartBtn = (Button) v.findViewById(R.id.btn_start_show);
-
-        showStartBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                ChatFragment fragment = new ChatFragment();
-                Bundle bundle = new Bundle(1);
-                bundle.putString("round", String.valueOf(round));
-                bundle.putString("rewardToken", rewardToken);
-                bundle.putString("rewardAmount", String.valueOf(rewardAmount));
-                fragment.setArguments(bundle);
-                transaction.replace(R.id.content_main_framelayout, fragment);
-                transaction.commit();
-            }
-        });
         return v;
     }
 

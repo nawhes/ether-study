@@ -4,9 +4,15 @@
     android:layout_width="match_parent"
     android:orientation="vertical"
     android:layout_height="match_parent"
+    android:gravity="center"
     tools:context=".fragment.WalletFragment">
 
-    <!-- TODO: Update blank fragment layout -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:text="당신의 지갑 주소"/>
+
     <TextView
         android:id="@+id/tvWalletAddress"
         android:layout_width="wrap_content"
@@ -15,6 +21,14 @@
         android:layout_centerHorizontal="true" />
 
     <TextView
+        android:layout_marginTop="20sp"
+        android:layout_width="wrap_content"
+        android:textSize="20sp"
+        android:layout_height="wrap_content"
+        android:text="상품 보유 현황"/>
+
+    <TextView
+        android:layout_marginTop="10dp"
         android:id="@+id/tv_eth_balance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -22,6 +36,7 @@
 
 
     <TextView
+        android:layout_marginTop="5dp"
         android:id="@+id/tv_token_balance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
