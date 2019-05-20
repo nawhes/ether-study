@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/fragment_chat"
     android:layout_width="match_parent"
@@ -7,107 +7,113 @@
     android:orientation="vertical"
     tools:context=".fragment.ChatFragment">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+    <LinearLayout
         android:orientation="vertical"
-        android:layout_alignParentTop="true"
-        android:layout_above="@+id/fragment_chat_button">
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3">
+
+        <TextView
+            android:gravity="center"
+            android:textSize="20sp"
+            android:id="@+id/tv_quiz"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:text="이더리움연구회의 최대 행사는?" />
 
         <LinearLayout
+            android:layout_marginTop="10dp"
+            android:id="@+id/layout_btns"
+            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_above="@+id/fragment_chat_listlayout"
-            android:orientation="vertical"
-            android:gravity="center">
-
-            <TextView
-                android:id="@+id/tv_quiz"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="이더리움연구회의 최대 행사는?" />
-
-            <LinearLayout
-                android:id="@+id/layout_btns"
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <Button
-                    android:id="@+id/btn_select1"
-                    android:layout_weight="1"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:text="분과모임" />
-
-                <Button
-                    android:id="@+id/btn_select2"
-                    android:layout_weight="1"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:text="엠티" />
-
-                <Button
-                    android:id="@+id/btn_select3"
-                    android:layout_weight="1"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:text="데브스탬프" />
-
-                <Button
-                    android:id="@+id/btn_select4"
-                    android:layout_weight="1"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:text="데브스탬프" />
-            </LinearLayout>
+            android:layout_height="wrap_content">
 
             <Button
-                android:visibility="gone"
-                android:layout_width="match_parent"
+                android:padding="10dp"
+                android:id="@+id/btn_select1"
+                android:layout_weight="1"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:id="@+id/btn_request_reward"
-                android:text="상금 받기"/>
+                android:text="분과모임" />
 
+            <Button
+                android:id="@+id/btn_select2"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="엠티" />
+
+            <Button
+                android:id="@+id/btn_select3"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="데브스탬프" />
+
+            <Button
+                android:padding="10dp"
+                android:id="@+id/btn_select4"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="데브스탬프" />
         </LinearLayout>
-
-
-        <LinearLayout
-            android:id="@+id/fragment_chat_listlayout"
-            android:layout_width="match_parent"
-            android:layout_height="400dp"
-            android:layout_alignParentBottom="true"
-            android:orientation="vertical">
-
-            <ListView
-                android:id="@+id/fragment_chat_listview"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_above="@+id/fragment_chat_button"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true">
-
-            </ListView>
-
-        </LinearLayout>
-    </RelativeLayout>
-
-
-        <EditText
-            android:id="@+id/fragment_chat_editText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentBottom="true"
-            android:layout_toLeftOf="@+id/fragment_chat_button" />
 
         <Button
-            android:id="@+id/fragment_chat_button"
-            android:layout_width="wrap_content"
+            android:visibility="gone"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentBottom="true"
+            android:id="@+id/btn_request_reward"
+            android:text="상금 받기"/>
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/fragment_chat_listlayout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="6"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_marginTop="20dp"
+            android:text="채팅창"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <ListView
+            android:id="@+id/fragment_chat_listview"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/fragment_chat_button"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true">
+
+        </ListView>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <EditText
+            android:layout_weight="8"
+            android:id="@+id/fragment_chat_editText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"/>
+
+        <Button
+            android:layout_weight="2"
+            android:id="@+id/fragment_chat_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:text="send" />
 
-</RelativeLayout>
+    </LinearLayout>
+
+</LinearLayout>
