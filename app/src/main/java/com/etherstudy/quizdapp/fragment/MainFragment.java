@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.etherstudy.quizdapp.QuizConstants;
 import com.etherstudy.quizdapp.R;
@@ -49,6 +50,7 @@ public class MainFragment extends Fragment {
     private String startDate;
     private String rewardToken;
     private int rewardAmount;
+    private int showState;
 
     private OnFragmentInteractionListener mListener;
 
@@ -91,16 +93,23 @@ public class MainFragment extends Fragment {
         showStartBtn = v.findViewById(R.id.btn_start_show);
         Log.i("MainFragment", "onCreateView");
         showStartBtn.setOnClickListener(v1 -> {
-            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-            ChatFragment fragment = new ChatFragment();
-            Bundle bundle = new Bundle(1);
-            bundle.putString("round", String.valueOf(round));
-            bundle.putString("rewardToken", rewardToken);
-            bundle.putString("rewardAmount", String.valueOf(rewardAmount));
-            fragment.setArguments(bundle);
-            transaction.replace(R.id.content_main_framelayout, fragment);
-            transaction.addToBackStack("MainFragment");
-            transaction.commit();
+            if (showState == 0) {
+                Toast.makeText(getActivity(), "참여 가능한 시간이 아닙니다!", Toast.LENGTH_LONG).show();
+            } else if (showState == 1) {
+                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                ChatFragment fragment = new ChatFragment();
+                Bundle bundle = new Bundle(1);
+                bundle.putString("round", String.valueOf(round));
+                bundle.putString("rewardToken", rewardToken);
+                bundle.putString("rewardAmount", String.valueOf(rewardAmount));
+                fragment.setArguments(bundle);
+                transaction.replace(R.id.content_main_framelayout, fragment);
+                transaction.addToBackStack("MainFragment");
+                transaction.commit();
+            } else if (showState == 2) {
+                Toast.makeText(getActivity(), "현재 퀴즈쇼가 진행중이어서 참여가 불가능합니다!", Toast.LENGTH_LONG).show();
+            }
+
         });
 
         AsyncTask.execute(() -> {
@@ -126,10 +135,12 @@ public class MainFragment extends Fragment {
                             rewardToken = jsonReader.nextString();
                         } else if (key.equals("rewardAmount")) {
                             rewardAmount = jsonReader.nextInt();
+                        } else if (key.equals("state")) {
+                            showState = jsonReader.nextInt();
                         }
                         else jsonReader.skipValue();
                     }
-                    Log.i("chpark", round + ", " + startDate + ", " + rewardToken + ", " + rewardAmount);
+                    Log.i("chpark", round + ", " + startDate + ", " + rewardToken + ", " + rewardAmount + ", " + showState);
                     jsonReader.close();
                     responseBodyReader.close();
                     responseBody.close();

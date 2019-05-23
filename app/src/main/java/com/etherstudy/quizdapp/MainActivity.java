@@ -69,15 +69,12 @@ public class MainActivity extends AppCompatActivity {
         mFirebaseRemoteConfig.setDefaults(R.xml.default_config);
 
         mFirebaseRemoteConfig.fetch(0)
-                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (task.isSuccessful()) {
-                            mFirebaseRemoteConfig.activateFetched();
-                        } else {
-                        }
-                        displayMessage();
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        mFirebaseRemoteConfig.activateFetched();
+                    } else {
                     }
+                    displayMessage();
                 });
     }
 

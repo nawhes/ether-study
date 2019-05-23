@@ -217,10 +217,11 @@ public class ChatFragment extends Fragment {
         getRewardBtn.setOnClickListener(view -> {
             AsyncTask.execute(() -> {
                 BigInteger reward = new BigInteger(String.valueOf(finalRewardAmount));
+
                 String myAddress = sf.getString("walletPubKey", "null");
                 Function function = new Function(
                         "transferFrom",
-                        Arrays.asList(new Address(QuizConstants.TOKEN_HOLDER_ADDRESS), new Address(myAddress),new Uint256(QuizConstants.CONTRACT_DECIMAL.multiply(reward))),
+                        Arrays.asList(new Address(QuizConstants.TOKEN_HOLDER_ADDRESS), new Address(myAddress), new Uint256(BigInteger.TEN.pow(QuizConstants.decimal).multiply(reward))),
                         Collections.emptyList());
                 String encodedFunction = FunctionEncoder.encode(function);
                 EthGetTransactionCount ethGetTransactionCount = null;
